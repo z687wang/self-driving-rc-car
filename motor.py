@@ -75,9 +75,9 @@ GPIO.setup(SER4,GPIO.OUT)#Servo4
 GPIO.setup(SER7,GPIO.OUT)#Horizontal servo port servo7
 GPIO.setup(SER8,GPIO.OUT)#Vertical servo port servo8
 Servo7=GPIO.PWM(SER7,50) #50HZ
-Servo7.start(0)
+Servo7.start(90)
 Servo8=GPIO.PWM(SER8,50) #50HZ
-Servo8.start(0)
+Servo8.start(90)
 
 # Motor Control
 
@@ -93,6 +93,70 @@ def Motor_Forward():
 	GPIO.output(LED2,False)#Headlight's anode to 5V, cathode to IO port
 
 
-Motor_Forward()
+def Motor_Backward():
+	print 'motor_backward'
+	GPIO.output(ENA,True)
+	GPIO.output(ENB,True)
+	GPIO.output(IN1,False)
+	GPIO.output(IN2,True)
+	GPIO.output(IN3,False)
+	GPIO.output(IN4,True)
+	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,False)#Headlight's anode to 5V, cathode to IO port
+	
+def Motor_TurnLeft():
+	print 'motor_turnleft'
+	GPIO.output(ENA,True)
+	GPIO.output(ENB,True)
+	GPIO.output(IN1,True)
+	GPIO.output(IN2,False)
+	GPIO.output(IN3,False)
+	GPIO.output(IN4,True)
+	GPIO.output(LED1,False)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
+def Motor_TurnRight():
+	print 'motor_turnright'
+	GPIO.output(ENA,True)
+	GPIO.output(ENB,True)
+	GPIO.output(IN1,False)
+	GPIO.output(IN2,True)
+	GPIO.output(IN3,True)
+	GPIO.output(IN4,False)
+	GPIO.output(LED1,False)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
+def Motor_Stop():
+	print 'motor_stop'
+	GPIO.output(ENA,False)
+	GPIO.output(ENB,False)
+	GPIO.output(IN1,False)
+	GPIO.output(IN2,False)
+	GPIO.output(IN3,False)
+	GPIO.output(IN4,False)
+	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
+
+#Servo angle drive function   
+def SetServo7Angle(angle_from_protocol):
+	angle=hex(eval('0x'+angle_from_protocol))
+	angle=int(angle,16)
+	Servo7.ChangeDutyCycle(2.5 + 10 * angle / 180) #set horizontal servo rotation angle
+	GPIO.output(LED0,False)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED1,False)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
+	time.sleep(0.01)
+	GPIO.output(LED0,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
+def SetServo8Angle(angle_from_protocol):
+	angle=hex(eval('0x'+angle_from_protocol))
+	angle=int(angle,16)
+	Servo8.ChangeDutyCycle(2.5 + 10 * angle / 180) #Set vertical servo rotation angel
+	GPIO.output(LED0,False)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,False)#Headlight's anode to 5V, cathode to IO port
+	time.sleep(0.01)
+	GPIO.output(LED0,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
+	GPIO.output(LED2,True)#Headlight's anode to 5V, cathode to IO port
 
 
