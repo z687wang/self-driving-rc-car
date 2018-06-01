@@ -4,7 +4,7 @@ Raspberry Pi WiFi video robot car drive souce code
 Writer: liuviking
 Copyright:Kuman Tech
 The code can be used free,but not for commerce purpose.
-All rights reserved, unauthorized use will be prosecuted by Kuman! 
+All rights reserved, unauthorized use will be prosecuted by Kuman!
 '''
 
 from socket import *
@@ -40,11 +40,11 @@ SER1 = 11	#Servo1
 SER2 = 8	#Servo2
 SER3 = 7	#Servo3
 SER4 = 5	#Servo4
-SER7 = 6	#Vertical servo  port servo7 
+SER7 = 6	#Vertical servo  port servo7
 SER8 = 12	#Horizontal servo port servo8
 
 ########Ultrasonic port defination#################
-ECHO = 4	#Ultrasonic receiving foot position  
+ECHO = 4	#Ultrasonic receiving foot position
 TRIG = 17	#Ultrasonic sending foot position
 
 ########Infrared sensor port defination#################
@@ -104,10 +104,10 @@ GPIO.setup(SER3,GPIO.OUT)#Servo3
 GPIO.setup(SER4,GPIO.OUT)#Servo4
 GPIO.setup(SER7,GPIO.OUT)#Horizontal servo port servo7
 GPIO.setup(SER8,GPIO.OUT)#Vertical servo port servo8
-Servo7=GPIO.PWM(SER7,50) #50HZ  
-Servo7.start(0)  
-Servo8=GPIO.PWM(SER8,50) #50HZ  
-Servo8.start(0)  
+Servo7=GPIO.PWM(SER7,50) #50HZ
+Servo7.start(0)
+Servo8=GPIO.PWM(SER8,50) #50HZ
+Servo8.start(0)
 
 
 ####################################################
@@ -129,7 +129,7 @@ def	Open_Light():#turn on headlight LED0
 def	Close_Light():#Close headlight
 	GPIO.output(LED0,True)#Headlight's anode to 5V, cathode to IO port
 	time.sleep(1)
-	
+
 ####################################################
 ##Function name init_light()
 ##Function performance running light
@@ -171,7 +171,7 @@ def Motor_Forward():
 	GPIO.output(IN4,False)
 	GPIO.output(LED1,False)#Headlight's anode to 5V, cathode to IO port
 	GPIO.output(LED2,False)#Headlight's anode to 5V, cathode to IO port
-	
+
 def Motor_Backward():
 	print 'motor_backward'
 	GPIO.output(ENA,True)
@@ -182,7 +182,7 @@ def Motor_Backward():
 	GPIO.output(IN4,True)
 	GPIO.output(LED1,True)#Headlight's anode to 5V, cathode to IO port
 	GPIO.output(LED2,False)#Headlight's anode to 5V, cathode to IO port
-	
+
 def Motor_TurnLeft():
 	print 'motor_turnleft'
 	GPIO.output(ENA,True)
@@ -216,7 +216,7 @@ def Motor_Stop():
 
 
 
-#Servo angle drive function   
+#Servo angle drive function
 def SetServo7Angle(angle_from_protocol):
 	angle=hex(eval('0x'+angle_from_protocol))
 	angle=int(angle,16)
@@ -311,7 +311,7 @@ def	Avoid_wave():
 ####################################################
 ##Function name Send_Distance()
 ##Function performance：ultrasonic distance PC terminal display
-##Entrance parameter：none			
+##Entrance parameter：none
 ##Exit parameter：noe
 ####################################################
 def	Send_Distance():
@@ -325,11 +325,11 @@ def	Cruising_Mod(func):
 	print 'into Cruising_Mod-01'
 	global Pre_Cruising_Flag
 	print 'Pre_Cruising_Flag %d '%Pre_Cruising_Flag
-	
+
 	global Cruising_Flag
 	print 'Cruising_Flag %d '%Cruising_Flag
 	while True:
-		if (Pre_Cruising_Flag != Cruising_Flag):			
+		if (Pre_Cruising_Flag != Cruising_Flag):
 			if (Pre_Cruising_Flag != 0):
 				Motor_Stop()
 			Pre_Cruising_Flag = Cruising_Flag
@@ -350,14 +350,14 @@ def	Cruising_Mod(func):
 
 
 
-    
-#Communication protocol decoding  
+
+#Communication protocol decoding
 def Communication_Decode():
 	global Pre_Cruising_Flag
 	global Cruising_Flag
 	print 'Communication_decoding...'
 	if buffer[0]=='00':
-		if buffer[1]=='01':			#forward	
+		if buffer[1]=='01':			#forward
 			Motor_Forward()
 		elif buffer[1]=='02':			#backward
 			Motor_Backward()
@@ -366,7 +366,7 @@ def Communication_Decode():
 		elif buffer[1]=='04':			#turn right
 			Motor_TurnRight()
 		elif buffer[1]=='00':			#stop
-			Motor_Stop() 
+			Motor_Stop()
 		else:
 			Motor_Stop()
 	elif buffer[0]=='01':
@@ -398,7 +398,7 @@ def Communication_Decode():
 			print '...'
 	else:
 		print '...'
-            
+
 
 
 
@@ -429,8 +429,8 @@ while True:
     print 'waitting for connection...'
     tcpCliSock,addr=tcpSerSock.accept()
     print '...connected from:',addr
-    
-    
+
+
     while True:
         try:
             data=tcpCliSock.recv(BUFSIZ)
@@ -438,11 +438,11 @@ while True:
         except:
             print "Error receiving:"
             break
-        
+
         if not data:
             break
         if rec_flag==0:
-            if data=='ff':  
+            if data=='ff':
                 buffer[:]=[]
                 rec_flag=1
                 i=0
@@ -456,9 +456,9 @@ while True:
             else:
                 buffer.append(data)
                 i+=1
-   
+
         #print(binascii.b2a_hex(data))
     tcpCliSock.close()
 tcpSerSock.close()
-    
+
 
