@@ -4,8 +4,8 @@ import time
 
 def getDistance ():
 	GPIO.setmode(GPIO.BCM)
-	TRIG = 23
-	ECHO = 24
+	TRIG = 17
+	ECHO = 4
 
 	print "Distance Measurement In Progress"
 
@@ -27,7 +27,7 @@ def getDistance ():
 
 	while GPIO.input(ECHO)==1:
 
-  		pulse_end = time.time() 
+  		pulse_end = time.time()
 
 	pulse_duration = pulse_end - pulse_start
 
@@ -39,3 +39,5 @@ def getDistance ():
 
 	GPIO.cleanup()
  	return distance
+
+getDistance()
