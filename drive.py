@@ -1,8 +1,8 @@
 import RPi.GPIO as GPIO
 import time
 
-def Motor_Forward():
-    print 'motor forward'
+def Motor_Backward():
+    print('motor backward')
     GPIO.output(ENA, True)
     GPIO.output(ENB, True)
     GPIO.output(IN1, True)
@@ -10,8 +10,8 @@ def Motor_Forward():
     GPIO.output(IN3, True)
     GPIO.output(IN4, False)
 
-def Motor_Backward():
-    print 'motor_backward'
+def Motor_Forward():
+    print('motor_forward')
     GPIO.output(ENA,True)
     GPIO.output(ENB,True)
     GPIO.output(IN1,False)
@@ -19,8 +19,8 @@ def Motor_Backward():
     GPIO.output(IN3,False)
     GPIO.output(IN4,True)
 
-def Motor_TurnLeft():
-    print 'motor_turnleft'
+def Motor_TurnRight():
+    print('motor_turnright')
     GPIO.output(ENA,True)
     GPIO.output(ENB,True)
     GPIO.output(IN1,True)
@@ -28,8 +28,8 @@ def Motor_TurnLeft():
     GPIO.output(IN3,False)
     GPIO.output(IN4,True)
 
-def Motor_TurnRight():
-    print 'motor_turnright'
+def Motor_TurnLeft():
+    print('motor_turnleft')
     GPIO.output(ENA,True)
     GPIO.output(ENB,True)
     GPIO.output(IN1,False)
@@ -38,7 +38,7 @@ def Motor_TurnRight():
     GPIO.output(IN4,False)
 
 def Motor_Stop():
-    print 'motor_stop'
+    print('motor_stop')
     GPIO.output(ENA,False)
     GPIO.output(ENB,False)
     GPIO.output(IN1,False)
@@ -65,14 +65,3 @@ GPIO.setup(IN2,GPIO.OUT,initial=GPIO.LOW)
 GPIO.setup(ENB,GPIO.OUT,initial=GPIO.LOW)
 GPIO.setup(IN3,GPIO.OUT,initial=GPIO.LOW)
 GPIO.setup(IN4,GPIO.OUT,initial=GPIO.LOW)
-
-Motor_Forward()
-time.sleep(0.8)
-Motor_Stop()
-Motor_TurnLeft()
-time.sleep(0.5)
-Motor_TurnRight()
-time.sleep(0.5)
-Motor_Backward()
-time.sleep(1)
-GPIO.cleanup()
