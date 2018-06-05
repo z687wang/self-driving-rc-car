@@ -6,11 +6,11 @@ import Adafruit_SSD1306
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
-from ultra import getDistance
+#from ultra import getDistance
 import subprocess
 
 RST = None
-DC = 23
+DC = 9
 SPI_PORT = 0
 SPI_DEVICE = 0
 
@@ -80,12 +80,12 @@ while True:
     draw.rectangle((0,0,width,height), outline=0, fill=0)
 
     # Get Distance
-    dist = getDistance()
+   # dist = getDistance()
     # Write two lines of text.
 
     draw.text((x, top),       "Name: z687wang",  font=font, fill=255)
     draw.text((x, top+8),     "Date: "+ str(datetime.now()), font=font, fill=255)
-    draw.text((x, top+16),    "Distance: " + str(dist) + "cm",  font=font, fill=255)
+    draw.text((x, top+16),    "Distance: " + str(15) + "cm",  font=font, fill=255)
     draw.text((x, top+25),    "GG",  font=font, fill=255)
 
     # Display image.
