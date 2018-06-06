@@ -2,7 +2,7 @@ import time
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
-PWM1=6
+PWM1=2
 GPIO.setwarnings(False)
 
 GPIO.setup(PWM1, GPIO.OUT, initial=GPIO.LOW)

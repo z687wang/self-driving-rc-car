@@ -4,7 +4,7 @@ import datetime
 import json
 import math
 
-class SpeedDetect:
+class SpeedDetectSensor:
     def __init__(self):
         self.ao = 5
         self.do = 7
@@ -29,6 +29,7 @@ class SpeedDetect:
     
     def calculateSpeed(self, r_cm):
         if self.elapse != 0:
+            print("good")
             self.rpm = 1 / self.elapse * 60
             circCm = (2 * math.pi)
             distKM = circCm / 100000
@@ -44,7 +45,9 @@ class SpeedDetect:
         self.initGPIO()
         self.init_interrupt()
         speed = self.calculateSpeed(self.radius)
-        return json.dumps({"speed: " speed})
+        print(speed)
+        GPIO.cleanup()
+        return json.dumps({"speed": speed})
     
     def __del__(self):
         GPIO.cleanup()

@@ -5,6 +5,7 @@ import json
 
 class UltrsonicSensor:
     def __init__(self):
+        GPIO.setwarnings(False)
         self.top_right_echo = 4
         self.top_right_trig = 17
         self.top_left_echo = 18
@@ -13,9 +14,10 @@ class UltrsonicSensor:
         self.bottom_right_trig = 3
         self.bottom_left_echo = 14
         self.bottom_left_trig = 15
+        GPIO.setmode(GPIO.BCM)
+        
 
     def measure(self, ECHO, TRIG):
-        GPIO.setmode(GPIO.BCM)
         GPIO.setup(TRIG, GPIO.OUT)
         GPIO.setup(ECHO, GPIO.IN)
         GPIO.output(TRIG, True)
@@ -58,7 +60,8 @@ class UltrsonicSensor:
         res2 = self.measure(self.top_left_echo, self.top_left_trig)
         res3 = self.measure(self.bottom_left_echo, self.bottom_left_trig)
         res4 = self.measure(self.bottom_right_echo, self.bottom_right_trig)
-        return json.dumps({ "top_right_distance": res1, "top_left_distance": res2,                "bottom_left_distance": res3, "bottom_right_distance": res4})
+        print(res1, res2, res3, res4)
+        return json.dumps({ "top_right_distance": res1, "top_left_distance": res2, "bottom_left_distance": res3, "bottom_right_distance": res4})
     
     def __del__(self):
         GPIO.cleanup()

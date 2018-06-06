@@ -14,6 +14,7 @@ class PathTracingSensor:
 
     def getTrack(self):
         res = self.trackPath()
+        print(res)
         return json.dumps({"onTrack": res})
     
     def __del__(self):
