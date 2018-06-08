@@ -13,5 +13,6 @@ class TemperatureSensor:
         W1ThermSensor.DEGREES_C,
         W1ThermSensor.DEGREES_F,
         W1ThermSensor.KELVIN])
-
+    print(temperature_in_celsius)
+    
     return json.dumps(temperature_in_all_units)
