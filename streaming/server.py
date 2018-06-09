@@ -65,7 +65,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         # Start an infinite loop when this is called
         if message == "read_camera":
             if not args.require_login or self.get_secure_cookie(COOKIE_NAME):
-                self.camera_loop = PeriodicCallback(self.loop, 10)
+                self.camera_loop = PeriodicCallback(self.camloop, 10)
                 self.camera_loop.start()
             else:
                 print("Unauthenticated websocket request")
@@ -74,7 +74,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         else:
             print("Unsupported function: " + message)
 
-    def loop(self):
+    def camloop(self):
         """Sends camera images in an infinite loop."""
         sio = io.StringIO()
 
@@ -90,11 +90,11 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         except tornado.websocket.WebSocketClosedError:
             self.camera_loop.stop()
     
-    def ultrasonicLoop(self):
+    def ultrasonicloop(self):
         ultra = UltrsonicSensor()
         return ultra
         
-    def obstacleDetectLoop(self):
+    def obstacleDetectloop(self):
         obs = ObstacleDetectionSensor()
         return obs 
 
