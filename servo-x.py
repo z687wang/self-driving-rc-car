@@ -19,21 +19,21 @@ XRservo中，有3个标准函数可直接使用
 	XRservo.XiaoRGEEK_ReSetServo()
 '''
 time.sleep(2)
-XRservo.XiaoRGEEK_SetServo(0x01,90)	##设置1舵机角度90°
+XRservo.XiaoRGEEK_SetServo(0x01,90)	
 print('ser1= 90')
 time.sleep(0.5)
-XRservo.XiaoRGEEK_SetServo(0x01,30)	##设置1舵机角度30°
+XRservo.XiaoRGEEK_SetServo(0x02,30)	
 print('ser1= 30°并存储')
 time.sleep(0.1)
-XRservo.XiaoRGEEK_SaveServo()		##存储当前角度（30°）
+XRservo.XiaoRGEEK_SaveServo()
 time.sleep(0.5)
-XRservo.XiaoRGEEK_SetServo(0x01,90)	##设置1舵机角度90°
+XRservo.XiaoRGEEK_SetServo(0x01,90)
 print('ser1= 90°')
 time.sleep(0.5)
-XRservo.XiaoRGEEK_SetServo(0x01,150)##设置1舵机角度150°
+XRservo.XiaoRGEEK_SetServo(0x01,150)
 print('ser1= 150°')
 time.sleep(1.5)
-XRservo.XiaoRGEEK_ReSetServo()		##恢复舵机存储的角度（30°）
+XRservo.XiaoRGEEK_ReSetServo()
 print('恢复存储的角度30°')
 
 '''

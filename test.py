@@ -3,6 +3,7 @@ from drive import Motor_Forward
 from drive import Motor_TurnLeft
 from drive import Motor_TurnRight
 from drive import Motor_Stop
+from drive import Motor_Reverse
 import time
 import sys
 while True:#making a loop
@@ -18,5 +19,7 @@ while True:#making a loop
             Motor_TurnRight()
         if (str == 'q'):
             Motor_Backward()
+        if (str == 'e'):
+            Motor_Reverse()
     except:
         break #if user pressed other than the given key the loop will break

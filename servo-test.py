@@ -9,8 +9,8 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 
-PWM1 = 12
-GPIO.setwarings(False)
+PWM1 = 6
+GPIO.setwarnings(False)
 
 GPIO.setup(PWM1, GPIO.OUT, inital=GPIO.LOW)
 

@@ -1,14 +1,29 @@
 import RPi.GPIO as GPIO
 import time
-GPIO.setwarnings(False)
+
+sensor = 24
+buzzer = 18
+
 GPIO.setmode(GPIO.BOARD)
-pin=#
-GPIO.setup(pin, GPIO.IN)         #Read output from PIR motion sensor
-while True:
-    i=GPIO.input(pin)
-    if i==0:                 #When output from motion sensor is LOW
-        print "No intruders",i
-        time.sleep(0.1)
-    elif i==1:               #When output from motion sensor is HIGH
-        print "Intruder detected",i
-    time.sleep(0.1)
+GPIO.setup(sensor,GPIO.IN)
+GPIO.setup(buzzer,GPIO.OUT)
+
+GPIO.output(buzzer,False)
+print "Initialzing PIR Sensor......"
+time.sleep(2)
+print "PIR Ready..."
+print " "
+
+try: 
+   while True:
+      if GPIO.input(sensor):
+          #GPIO.output(buzzer,True)
+          print "Motion Detected"
+          time.sleep(0.2)
+      else:
+          print"Non Detected"
+          #GPIO.output(buzzer,False)
+
+
+except KeyboardInterrupt:
+    GPIO.cleanup()

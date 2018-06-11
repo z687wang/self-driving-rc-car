@@ -2,7 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 
-LaserGPIO = 19 # --> PIN11/GPIO17
+LaserGPIO = 23
 
 def setup():
     GPIO.setmode(GPIO.BCM)
