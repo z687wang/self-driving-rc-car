@@ -9,15 +9,21 @@ import os
 import time
 import threading
 import webbrowser
+import datetime as dt
 import RPi.GPIO as GPIO
-from sensors.Ultrasonic.Ultrasonic import UltrsonicSensor
+from sensors.Ultrasonic.UltrasonicHandler import UltrasonicHandler
 from sensors.ObstacleDetect.ObstacleDetect import ObstacleDetectionSensor
+from sensors.Ultrasonic.Ultrasonic import UltrsonicSensor
+from sensors.Temperature.TemperatureHandler import TemperatureHandler
+from sensors.Motor.MotorHandler import MotorHandler
+
 try:
     import cStringIO as io
 except ImportError:
     import io
 
 import tornado.web
+import tornado.ioloop
 import tornado.websocket
 from tornado.ioloop import PeriodicCallback
 
@@ -26,7 +32,6 @@ ROOT = os.path.normpath(os.path.dirname(__file__))
 with open(os.path.join(ROOT, "password.txt")) as in_file:
     PASSWORD = in_file.read().strip()
 COOKIE_NAME = "camp"
-
 
 class IndexHandler(tornado.web.RequestHandler):
 
@@ -62,48 +67,30 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         """Evaluates the function pointed to by json-rpc."""
 
-        # Start an infinite loop when this is called
         if message == "read_camera":
-            if not args.require_login or self.get_secure_cookie(COOKIE_NAME):
-                self.camera_loop = PeriodicCallback(self.camloop, 10)
-                self.camera_loop.start()
-            else:
-                print("Unauthenticated websocket request")
-
-        # Extensibility for other methods
+            self.sio = io.StringIO()
+            camera.start_recording(self.sio, format="mjpeg")
+            self.camloop()
         else:
             print("Unsupported function: " + message)
 
     def camloop(self):
         """Sends camera images in an infinite loop."""
-        sio = io.StringIO()
+        while True:
+            try:
+                print(self.sio.getvalue())
+                self.write_message(base64.b64encode(self.sio.getvalue()))
+            except tornado.websocket.WebSocketClosedError:
+                camera.stop_recording()
+                break
 
-        if args.use_usb:
-            _, frame = camera.read()
-            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            img.save(sio, "JPEG")
-        else:
-            camera.capture(sio, "jpeg", use_video_port=True)
-
-        try:
-            self.write_message(base64.b64encode(sio.getvalue()))
-        except tornado.websocket.WebSocketClosedError:
-            self.camera_loop.stop()
-    
-    def ultrasonicloop(self):
-        ultra = UltrsonicSensor()
-        return ultra
-        
-    def obstacleDetectloop(self):
-        obs = ObstacleDetectionSensor()
-        return obs 
 
 
 parser = argparse.ArgumentParser(description="Starts a webserver that "
                                  "connects to a webcam.")
 parser.add_argument("--port", type=int, default=8000, help="The "
                     "port on which to serve the website.")
-parser.add_argument("--resolution", type=str, default="low", help="The "
+parser.add_argument("--resolution", type=str, default="high", help="The "
                     "video resolution. Can be high, medium, or low.")
 parser.add_argument("--require-login", action="store_true", help="Require "
                     "a password to log in to webserver.")
@@ -119,6 +106,8 @@ if args.use_usb:
     camera = cv2.VideoCapture(args.usb_id)
 else:
     import picamera
+    destination = '/home/pi/video'
+    filename = os.path.join(destination, dt.datetime.now().strftime('%Y-%m-%d_%H.%M.%S.h264'))
     camera = picamera.PiCamera()
     camera.start_preview()
 
@@ -130,11 +119,17 @@ if args.resolution in resolutions:
         camera.set(4, h)
     else:
         camera.resolution = resolutions[args.resolution]
+        camera.framerate = 24
 else:
     raise Exception("%s not in resolution options." % args.resolution)
 
+
+
 handlers = [(r"/", IndexHandler), (r"/login", LoginHandler),
-            (r"/websocket", WebSocket),
+            (r"/cam", WebSocket),
+            (r"/ultra", UltrasonicHandler),
+            (r"/temperature", TemperatureHandler),
+            (r"/motor", MotorHandler),
             (r"/static/password.txt", ErrorHandler),
             (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': ROOT})]
 application = tornado.web.Application(handlers, cookie_secret=PASSWORD)

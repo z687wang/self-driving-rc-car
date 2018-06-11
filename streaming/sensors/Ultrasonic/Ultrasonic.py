@@ -3,7 +3,9 @@ import RPi.GPIO as GPIO
 import datetime
 import json
 
+
 class UltrsonicSensor:
+    
     def __init__(self):
         GPIO.setwarnings(False)
         self.top_right_echo = 4
@@ -44,7 +46,7 @@ class UltrsonicSensor:
         return json.dumps({ "top_right_distance": res })
     
     def top_left_data(self):
-        res = self.measure(self.top_right_echo, self.top_right_trig)
+        res = self.measure(self.top_left_echo, self.top_left_trig)
         return json.dumps({ "top_left_distance": res })
 
     def bottom_left_data(self):
@@ -61,7 +63,7 @@ class UltrsonicSensor:
         res3 = self.measure(self.bottom_left_echo, self.bottom_left_trig)
         res4 = self.measure(self.bottom_right_echo, self.bottom_right_trig)
         print(res1, res2, res3, res4)
-        return json.dumps({ "top_right_distance": res1, "top_left_distance": res2, "bottom_left_distance": res3, "bottom_right_distance": res4})
-    
+        return ({ "top_right_distance": res1, "top_left_distance": res2, "bottom_left_distance": res3, "bottom_right_distance": res4})
+
     def __del__(self):
         GPIO.cleanup()
