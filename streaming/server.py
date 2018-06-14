@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-"""
-Creates an HTTP server with basic auth and websocket communication.
-"""
 import argparse
 import base64
 import hashlib
@@ -16,7 +13,7 @@ from sensors.ObstacleDetect.ObstacleDetect import ObstacleDetectionSensor
 from sensors.Ultrasonic.Ultrasonic import UltrsonicSensor
 from sensors.Temperature.TemperatureHandler import TemperatureHandler
 from sensors.Motor.MotorHandler import MotorHandler
-
+from sensors.Camera.CameraHandler import CameraHandler
 try:
     import cStringIO as io
 except ImportError:
@@ -42,47 +39,32 @@ class IndexHandler(tornado.web.RequestHandler):
             self.render("index.html", port=args.port)
 
 
-class LoginHandler(tornado.web.RequestHandler):
-
-    def get(self):
-        self.render("login.html")
-
-    def post(self):
-        password = self.get_argument("password", "")
-        if hashlib.sha512(password).hexdigest() == PASSWORD:
-            self.set_secure_cookie(COOKIE_NAME, str(time.time()))
-            self.redirect("/")
-        else:
-            time.sleep(1)
-            self.redirect(u"/login?error")
-
-
 class ErrorHandler(tornado.web.RequestHandler):
     def get(self):
         self.send_error(status_code=403)
 
 
-class WebSocket(tornado.websocket.WebSocketHandler):
+# class WebSocket(tornado.websocket.WebSocketHandler):
 
-    def on_message(self, message):
-        """Evaluates the function pointed to by json-rpc."""
+#     def on_message(self, message):
+#         """Evaluates the function pointed to by json-rpc."""
 
-        if message == "read_camera":
-            self.sio = io.StringIO()
-            camera.start_recording(self.sio, format="mjpeg")
-            self.camloop()
-        else:
-            print("Unsupported function: " + message)
+#         if message == "read_camera":
+#             self.sio = io.StringIO()
+#             camera.start_recording(self.sio, format="mjpeg")
+#             self.camloop()
+#         else:
+#             print("Unsupported function: " + message)
 
-    def camloop(self):
-        """Sends camera images in an infinite loop."""
-        while True:
-            try:
-                print(self.sio.getvalue())
-                self.write_message(base64.b64encode(self.sio.getvalue()))
-            except tornado.websocket.WebSocketClosedError:
-                camera.stop_recording()
-                break
+#     def camloop(self):
+#         """Sends camera images in an infinite loop."""
+#         while True:
+#             try:
+#                 print(self.sio.getvalue())
+#                 self.write_message(base64.b64encode(self.sio.getvalue()))
+#             except tornado.websocket.WebSocketClosedError:
+#                 camera.stop_recording()
+#                 break
 
 
 
@@ -100,33 +82,33 @@ parser.add_argument("--usb-id", type=int, default=0, help="The "
                      "usb camera number to display")
 args = parser.parse_args()
 
-if args.use_usb:
-    import cv2
-    from PIL import Image
-    camera = cv2.VideoCapture(args.usb_id)
-else:
-    import picamera
-    destination = '/home/pi/video'
-    filename = os.path.join(destination, dt.datetime.now().strftime('%Y-%m-%d_%H.%M.%S.h264'))
-    camera = picamera.PiCamera()
-    camera.start_preview()
+# if args.use_usb:
+#     import cv2
+#     from PIL import Image
+#     camera = cv2.VideoCapture(args.usb_id)
+# else:
+#     import picamera
+#     destination = '/home/pi/video'
+#     filename = os.path.join(destination, dt.datetime.now().strftime('%Y-%m-%d_%H.%M.%S.h264'))
+#     camera = picamera.PiCamera()
+#     camera.start_preview()
 
-resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240)}
-if args.resolution in resolutions:
-    if args.use_usb:
-        w, h = resolutions[args.resolution]
-        camera.set(3, w)
-        camera.set(4, h)
-    else:
-        camera.resolution = resolutions[args.resolution]
-        camera.framerate = 24
-else:
-    raise Exception("%s not in resolution options." % args.resolution)
+# resolutions = {"high": (1280, 720), "medium": (640, 480), "low": (320, 240)}
+# if args.resolution in resolutions:
+#     if args.use_usb:
+#         w, h = resolutions[args.resolution]
+#         camera.set(3, w)
+#         camera.set(4, h)
+#     else:
+#         camera.resolution = resolutions[args.resolution]
+#         camera.framerate = 24
+# else:
+#     raise Exception("%s not in resolution options." % args.resolution)
 
 
 
-handlers = [(r"/", IndexHandler), (r"/login", LoginHandler),
-            (r"/cam", WebSocket),
+handlers = [(r"/", IndexHandler),
+            (r"/camera", CameraHandler(args)),
             (r"/ultra", UltrasonicHandler),
             (r"/temperature", TemperatureHandler),
             (r"/motor", MotorHandler),
