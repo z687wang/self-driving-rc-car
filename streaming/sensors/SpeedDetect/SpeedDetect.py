@@ -7,7 +7,7 @@ import math
 class SpeedDetectSensor:
     def __init__(self):
         self.ao = 5
-        self.do = 7
+        self.do = 12
         self.counter = 0
         self.rpm = 0
         self.kmPerHour = 0
@@ -35,7 +35,7 @@ class SpeedDetectSensor:
             distKM = circCm / 100000
             kmPerSec = distKM / self.elapse
             self.kmPerHour = kmPerSec * 3600
-            self.distMeas = (distKM * self.pulse) * 1000
+            self.distMeas = (distKM * self.pulse) * 1000 / 20
             return self.kmPerHour
 
     def init_interrupt(self):

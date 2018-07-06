@@ -5,7 +5,7 @@ import time
 
 while True:
 
-    humidity, temperature = Adafruit_DHT.read_retry(11, 22)
+    humidity, temperature = Adafruit_DHT.read_retry(11, 23)
 
     print(humidity, temperature)
     time.sleep(4)

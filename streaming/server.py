@@ -108,7 +108,7 @@ args = parser.parse_args()
 
 
 handlers = [(r"/", IndexHandler),
-            (r"/camera", CameraHandler(args)),
+            (r"/camera", CameraHandler),
             (r"/ultra", UltrasonicHandler),
             (r"/temperature", TemperatureHandler),
             (r"/motor", MotorHandler),
