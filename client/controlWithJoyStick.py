@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import pygame
-from pygame.locals import *
-import cv2
-import time
-import os
 import websocket
-import _thread
+import numpy as np
 
 host = '192.168.5.66'
 port = '8000'
@@ -37,6 +33,11 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
     
+def getAngle(x, y):
+    angle = np.arctan2(x, y)
+    if (angle <= 0):
+        angle = (2 * np.pi + angle)
+    return angle * 360 / (2 * np.pi) - 275
 
 def on_message(ws, message):
     print(message)
@@ -52,68 +53,44 @@ def on_open(ws):
     pygame.init()
     size = [500, 700]
     screen = pygame.display.set_mode(size)
-
     pygame.display.set_caption("My Game")
-    #Loop until the user clicks the close button.
-    done = False
-    
-    # Used to manage how fast the screen updates
+    control = True
     clock = pygame.time.Clock()
-    
-    # Initialize the joysticks
     pygame.joystick.init()
-        
-    # Get ready to print
     textPrint = TextPrint()
     # -------- Main Program Loop -----------
-    while done==False:
-        # EVENT PROCESSING STEP
-        for event in pygame.event.get(): # User did something
-            if event.type == pygame.QUIT: # If user clicked close
-                done=True # Flag that we are done so we exit this loop
-            
-            # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
-            if event.type == pygame.JOYBUTTONDOWN:
-                1+1
-                #print("Joystick button pressed.")
-            if event.type == pygame.JOYBUTTONUP:
-                1+1
-                #print("Joystick button released.")
+    while control:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                control = False
         screen.fill(WHITE)
         textPrint.reset()
-    
-        # Get count of joysticks
         joystick_count = pygame.joystick.get_count()
     
         textPrint.print(screen, "Number of joysticks: {}".format(joystick_count) )
         textPrint.indent()
-        
-        # For each joystick:
         for i in range(joystick_count):
             joystick = pygame.joystick.Joystick(i)
             joystick.init()
-        
+
+            # --------- Control Key -----------
+            linearKey = joystick.get_axis(2)
+            stopKey = joystick.get_button(0)
+            exitKey = joystick.get_button(1)
+            axisX = joystick.get_axis(0)
+            axisY = joystick.get_axis(1)
+            turnAngle = getAngle(axisX, axisY)
+            turnX, turnY = joystick.get_hat(0)
+
             textPrint.print(screen, "Joystick {}".format(i) )
             textPrint.indent()
-        
-            # Get the name from the OS for the controller/joystick
             name = joystick.get_name()
             textPrint.print(screen, "Joystick name: {}".format(name) )
-            
-            # Usually axis run in pairs, up/down for one, and left/right for
-            # the other.
             axes = joystick.get_numaxes()
             textPrint.print(screen, "Number of axes: {}".format(axes) )
-            textPrint.indent()
-            
+            textPrint.indent()      
             for i in range( axes ):
                 axis = joystick.get_axis( i )
-                if (i == 2 and axis < -0.001):
-                    print("forward")
-                    ws.send("forward")
-                elif (i == 2 and axis > 0.001):
-                    print("stop")
-                    ws.send("backward")
                 textPrint.print(screen, "Axis {} value: {:>6.3f}".format(i, axis) )
             textPrint.unindent()
                 
@@ -123,31 +100,48 @@ def on_open(ws):
     
             for i in range( buttons ):
                 button = joystick.get_button( i )
-                if (i == 0 and button > 0):
-                    print("stop")
-                    ws.send("stop")
                 textPrint.print(screen, "Button {:>2} value: {}".format(i,button) )
             textPrint.unindent()
                 
-            # Hat switch. All or nothing for direction, not like joysticks.
-            # Value comes back in an array.
             hats = joystick.get_numhats()
             textPrint.print(screen, "Number of hats: {}".format(hats) )
             textPrint.indent()
     
             for i in range( hats ):
-                x, y = joystick.get_hat( i )
-                if (x > 0):
-                    print("right")
-                    ws.send("right")
-                elif (x < 0):
-                    print("left")
-                    ws.send("left")
+                x, y  = joystick.get_hat( i )
                 textPrint.print(screen, "Hat {} value: {}".format(i, str(x), str(y)) )
             textPrint.unindent()    
             
             textPrint.unindent()
-    
+
+            if (linearKey < -0.001):
+                print("Forward")
+                ws.send("forward")
+            elif (linearKey > 0.001):
+                print("Backward")
+                ws.send("backward")
+
+            if (stopKey > 0):
+                print("Stop")
+                ws.send("stop")
+            
+            if (exitKey > 0):
+                control = False
+
+            if (turnX > 0):
+                print('Right')
+                ws.send("right")
+            elif (turnX < 0):
+                print("Left")
+                ws.send("left")
+                
+            if (abs(axisX) > 0.001 and abs(axisY) > 0.001):
+                if (0 < turnAngle < 90):
+                    print("Turn Right with Angle:", turnAngle)
+                    #ws.send("right")
+                elif (-90 < turnAngle < 0):
+                    print("Turn Left with Angle:", -turnAngle)
+                    #ws.send("left")
         
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
         
@@ -156,10 +150,7 @@ def on_open(ws):
     
         # Limit to 20 frames per second
         clock.tick(20)
-        
-    # Close the window and quit.
-    # If you forget this line, the program will 'hang'
-    # on exit if running from IDLE.
+
     pygame.quit ()
           
 if __name__ == "__main__":

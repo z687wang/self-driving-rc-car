@@ -13,7 +13,7 @@ class CollectTrainingData(object):
     def __init__(self):
 
         self.server_socket = socket.socket()
-        self.server_socket.bind(('192.168.137.1', 9001))
+        self.server_socket.bind(('', 9001))
         self.server_socket.listen(0)
 
         # accept a single connection
@@ -48,10 +48,7 @@ class CollectTrainingData(object):
             frame = 1
             while self.send_inst:
                 data = self.connection.read(1024)
-                print(stream_bytes)
                 stream_bytes += data
-    
-                print(stream_bytes)
                 first = stream_bytes.find(b'\xff\xd8')
                 last = stream_bytes.find(b'\xff\xd9')
                 if first != -1 and last != -1:

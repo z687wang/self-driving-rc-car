@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 # Define some colors
 BLACK    = (   0,   0,   0)
@@ -28,6 +29,12 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
     
+
+def getAngle(y, x):
+    angle = np.arctan2(x, y)
+    if (angle <= 0):
+        angle = (2*np.pi+angle)
+    return angle*360/(2*np.pi) - 275
 
 pygame.init()
  
@@ -116,7 +123,35 @@ while done==False:
         for i in range( hats ):
             hat = joystick.get_hat( i )
             textPrint.print(screen, "Hat {} value: {}".format(i, str(hat)) )
-        textPrint.unindent()    
+
+        linearKey = joystick.get_axis(2)
+        stopKey = joystick.get_button(0)
+        exitKey = joystick.get_button(1)
+        axisX = joystick.get_axis(0)
+        axisY = joystick.get_axis(1)
+        turnAngle = getAngle(axisX, axisY)
+
+        if (linearKey < -0.001):
+            print("Forward")
+            #ws.send("forward")
+        elif (linearKey > 0.001):
+            print("Backward")
+            #ws.send("backward")
+
+        if (stopKey > 0):
+            print("Stop")
+            #ws.send("stop")
+
+        if (exitKey > 0):
+            print("Exit")
+            done = True
+        if (abs(axisX) > 0.001 and abs(axisY) > 0.001):
+            if (0 < turnAngle < 90):
+                print("Turn Left with Angle:", turnAngle)
+            elif (-90 < turnAngle < 0):
+                print("Turn Right with Angle:", turnAngle)
+
+        textPrint.unindent()
         
         textPrint.unindent()
 
