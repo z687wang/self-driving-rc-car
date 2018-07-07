@@ -7,11 +7,9 @@ import socket
 import time
 import os
 
-
 class CollectTrainingData(object):
-    
-    def __init__(self):
 
+    def __init__(self):
         self.server_socket = socket.socket()
         self.server_socket.bind(('', 9001))
         self.server_socket.listen(0)
