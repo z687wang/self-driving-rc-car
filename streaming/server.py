@@ -14,6 +14,7 @@ from sensors.Ultrasonic.Ultrasonic import UltrsonicSensor
 from sensors.Temperature.TemperatureHandler import TemperatureHandler
 from sensors.Motor.MotorHandler import MotorHandler
 from sensors.Camera.CameraHandler import CameraHandler
+from sensors.ObstacleDetect.ObstackeDetectHandler import ObstacleDetectHandler
 try:
     import cStringIO as io
 except ImportError:
@@ -111,6 +112,7 @@ handlers = [(r"/", IndexHandler),
             (r"/camera", CameraHandler),
             (r"/ultra", UltrasonicHandler),
             (r"/temperature", TemperatureHandler),
+            (r"/obstacle", ObstacleDetectHandler),
             (r"/motor", MotorHandler),
             (r"/static/password.txt", ErrorHandler),
             (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': ROOT})]

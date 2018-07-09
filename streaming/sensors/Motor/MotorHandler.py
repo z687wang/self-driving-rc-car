@@ -17,10 +17,16 @@ class MotorHandler(tornado.websocket.WebSocketHandler):
             self.motor.Motor_Backward()
         elif message == "left":
             print("message recived - left")
-            self.motor.Motor_TurnRight()
+            self.motor.Motor_TurnLeft()
         elif message == "right":
             print("message recived - right")
-            self.motor.Motor_TurnLeft()
+            self.motor.Motor_TurnRight()
+        elif message == 'forwardLeft':
+            print("message received - forwardLeft")
+            self.motor.Motor_ForwardLeft()
+        elif message == 'forwardRight':
+            print("message received - forwardRight")
+            self.motor.Motor_ForwardRight()
         elif message == "stop":
             self.motor.Motor_Stop()
         else:
