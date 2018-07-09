@@ -14,8 +14,8 @@ class UltrsonicSensor:
         self.top_left_trig = 27
         self.bottom_right_echo = 2
         self.bottom_right_trig = 3
-        self.bottom_left_echo = 14
-        self.bottom_left_trig = 15
+        self.bottom_left_echo = 5
+        self.bottom_left_trig = 6
         GPIO.setmode(GPIO.BCM)
         
 
@@ -51,10 +51,12 @@ class UltrsonicSensor:
 
     def bottom_left_data(self):
         res = self.measure(self.bottom_left_echo, self.bottom_left_trig)
+        print(res)
         return json.dumps({ "bottom_left_distance": res })
     
     def bottom_right_data(self):
         res = self.measure(self.bottom_right_echo, self.bottom_right_trig)
+        print(res)
         return json.dumps({ "bottom_right_distance": res })
     
     def all_data(self):
