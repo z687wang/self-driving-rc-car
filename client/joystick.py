@@ -44,45 +44,32 @@ screen = pygame.display.set_mode(size)
 
 pygame.display.set_caption("My Game")
 
-#Loop until the user clicks the close button.
 done = False
 
-# Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-# Initialize the joysticks
 pygame.joystick.init()
     
-# Get ready to print
 textPrint = TextPrint()
 
-# -------- Main Program Loop -----------
-while done==False:
-    # EVENT PROCESSING STEP
+while done == False:
     for event in pygame.event.get(): # User did something
         if event.type == pygame.QUIT: # If user clicked close
             done=True # Flag that we are done so we exit this loop
         
-        # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN JOYBUTTONUP JOYHATMOTION
         if event.type == pygame.JOYBUTTONDOWN:
             print("Joystick button pressed.")
         if event.type == pygame.JOYBUTTONUP:
             print("Joystick button released.")
             
- 
-    # DRAWING STEP
-    # First, clear the screen to white. Don't put other drawing commands
-    # above this, or they will be erased with this command.
     screen.fill(WHITE)
     textPrint.reset()
 
-    # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
 
     textPrint.print(screen, "Number of joysticks: {}".format(joystick_count) )
     textPrint.indent()
     
-    # For each joystick:
     for i in range(joystick_count):
         joystick = pygame.joystick.Joystick(i)
         joystick.init()
@@ -90,12 +77,9 @@ while done==False:
         textPrint.print(screen, "Joystick {}".format(i) )
         textPrint.indent()
     
-        # Get the name from the OS for the controller/joystick
         name = joystick.get_name()
         textPrint.print(screen, "Joystick name: {}".format(name) )
-        
-        # Usually axis run in pairs, up/down for one, and left/right for
-        # the other.
+
         axes = joystick.get_numaxes()
         textPrint.print(screen, "Number of axes: {}".format(axes) )
         textPrint.indent()
@@ -113,9 +97,7 @@ while done==False:
             button = joystick.get_button( i )
             textPrint.print(screen, "Button {:>2} value: {}".format(i,button) )
         textPrint.unindent()
-            
-        # Hat switch. All or nothing for direction, not like joysticks.
-        # Value comes back in an array.
+
         hats = joystick.get_numhats()
         textPrint.print(screen, "Number of hats: {}".format(hats) )
         textPrint.indent()
@@ -155,16 +137,8 @@ while done==False:
         
         textPrint.unindent()
 
-    
-    # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-    
-    # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
-    # Limit to 20 frames per second
     clock.tick(20)
-    
-# Close the window and quit.
-# If you forget this line, the program will 'hang'
-# on exit if running from IDLE.
+
 pygame.quit ()
