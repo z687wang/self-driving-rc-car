@@ -40,7 +40,7 @@ def getAngle(x, y):
     return angle * 360 / (2 * np.pi) - 275
 
 class ControlWithJoyStick:
-    def __init__(self):
+    def start(self):
         pygame.init()
         size = [500, 700]
         screen = pygame.display.set_mode(size)
@@ -62,45 +62,45 @@ class ControlWithJoyStick:
             textPrint.print(screen, "Number of joysticks: {}".format(joystick_count) )
             textPrint.indent()
             for i in range(joystick_count):
-                joystick = pygame.joystick.Joystick(i)
-                joystick.init()
+                self.joystick = pygame.joystick.Joystick(i)
+                self.joystick.init()
 
                 # --------- Control Key -----------
-                linearKey = joystick.get_axis(2)
-                stopKey = joystick.get_button(0)
-                exitKey = joystick.get_button(1)
-                axisX = joystick.get_axis(0)
-                axisY = joystick.get_axis(1)
+                linearKey = self.joystick.get_axis(2)
+                stopKey = self.joystick.get_button(0)
+                exitKey = self.joystick.get_button(1)
+                axisX = self.joystick.get_axis(0)
+                axisY = self.joystick.get_axis(1)
                 turnAngle = getAngle(axisX, axisY)
-                turnX, turnY = joystick.get_hat(0)
+                turnX, turnY = self.joystick.get_hat(0)
 
                 textPrint.print(screen, "Joystick {}".format(i) )
                 textPrint.indent()
-                name = joystick.get_name()
+                name = self.joystick.get_name()
                 textPrint.print(screen, "Joystick name: {}".format(name) )
-                axes = joystick.get_numaxes()
+                axes = self.joystick.get_numaxes()
                 textPrint.print(screen, "Number of axes: {}".format(axes) )
                 textPrint.indent()
                 for i in range( axes ):
-                    axis = joystick.get_axis( i )
+                    axis = self.joystick.get_axis( i )
                     textPrint.print(screen, "Axis {} value: {:>6.3f}".format(i, axis) )
                 textPrint.unindent()
 
-                buttons = joystick.get_numbuttons()
+                buttons = self.joystick.get_numbuttons()
                 textPrint.print(screen, "Number of buttons: {}".format(buttons) )
                 textPrint.indent()
 
                 for i in range( buttons ):
-                    button = joystick.get_button( i )
+                    button = self.joystick.get_button( i )
                     textPrint.print(screen, "Button {:>2} value: {}".format(i,button) )
                 textPrint.unindent()
 
-                hats = joystick.get_numhats()
+                hats = self.joystick.get_numhats()
                 textPrint.print(screen, "Number of hats: {}".format(hats) )
                 textPrint.indent()
 
                 for i in range( hats ):
-                    x, y  = joystick.get_hat( i )
+                    x, y  = self.joystick.get_hat( i )
                     textPrint.print(screen, "Hat {} value: {}".format(i, str(x), str(y)) )
                 textPrint.unindent()
 
@@ -131,14 +131,14 @@ class ControlWithJoyStick:
                     print("Left")
                     #ws.send("left")
                     self.remoteControl.left()
-
                 if (abs(axisX) > 0.001 and abs(axisY) > 0.001):
-                    if (0 < turnAngle < 90):
+                    if (abs(turnAngle) > 90):
                         print("Turn Right with Angle:", turnAngle)
-                        #ws.send("right")
-                    elif (-90 < turnAngle < 0):
+                        self.remoteControl.forwardRight()
+                    elif (abs(turnAngle) < 90):
                         print("Turn Left with Angle:", -turnAngle)
-                        #ws.send("left")
+                        self.remoteControl.forwardLeft()
+
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
@@ -149,6 +149,10 @@ class ControlWithJoyStick:
             clock.tick(20)
             self.remoteControl.exit()
 
+    def get_joystick(self):
+        return self.joystick
+
 if __name__ == "__main__":
     ctrl = ControlWithJoyStick()
+    ctrl.start()
 
