@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Jun 16 14:09:24 2018
-
-@author: tonyz
-"""
 
 import websocket
 import threading
@@ -47,6 +42,12 @@ class RemoteControl:
 
     def stop(self):
         self.ws.send('stop')
+
+    def forwardLeft(self):
+        self.ws.send('forwardLeft')
+
+    def forwardRight(self):
+        self.ws.send('forwardRight')
 
     def exit(self):
         self.ws.keep_running = False
