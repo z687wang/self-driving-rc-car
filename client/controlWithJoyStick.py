@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 import pygame
 import numpy as np
 from remoteControl import RemoteControl
 
-host = '192.168.5.66'
-port = '8000'
-tail = '/motor'
 send = True
 
 # Define some colors
@@ -40,6 +37,11 @@ def getAngle(x, y):
     return angle * 360 / (2 * np.pi) - 275
 
 class ControlWithJoyStick:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.tail = '/motor'
+
     def start(self):
         pygame.init()
         size = [500, 700]
@@ -49,7 +51,7 @@ class ControlWithJoyStick:
         clock = pygame.time.Clock()
         pygame.joystick.init()
         textPrint = TextPrint()
-        self.remoteControl = RemoteControl(host, port, tail)
+        self.remoteControl = RemoteControl(self.host, self.port, self.tail)
         # -------- Main Program Loop -----------
         while control:
             for event in pygame.event.get():
@@ -139,10 +141,6 @@ class ControlWithJoyStick:
                         print("Turn Left with Angle:", -turnAngle)
                         self.remoteControl.forwardLeft()
 
-
-            # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-
-            # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
 
             # Limit to 20 frames per second
@@ -153,6 +151,6 @@ class ControlWithJoyStick:
         return self.joystick
 
 if __name__ == "__main__":
-    ctrl = ControlWithJoyStick()
+    ctrl = ControlWithJoyStick('192.168.5.66', '8000')
     ctrl.start()
 

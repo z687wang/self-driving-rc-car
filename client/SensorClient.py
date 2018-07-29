@@ -11,6 +11,7 @@ class UltrasonicSensorClient:
         self.top_right = data['top_right_distance']
         self.bot_left = data['bottom_left_distance']
         self.bot_right = data['bottom_right_distance']
+        print(self.top_left, self.top_right, self.bot_left, self.bot_right)
 
     def on_error(self, ws, error):
         print(error)
@@ -74,11 +75,11 @@ class ObstacleDetectClient:
 
 
 
-#test = UltrasonicSensorClient('192.168.5.66', '8000')
-test = ObstacleDetectClient('192.168.5.66', '8000')
-
-while True:
-    print(test.left_obstacle)
-    print(test.right_obstacle)
-    # print(test.bot_right)
-    # print(test.top_left)
+test = UltrasonicSensorClient('192.168.5.66', '8000')
+# test = ObstacleDetectClient('192.168.5.66', '8000')
+#
+# while True:
+#     print(test.left_obstacle)
+#     print(test.right_obstacle)
+#     # print(test.bot_right)
+#     # print(test.top_left)

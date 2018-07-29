@@ -1,13 +1,21 @@
 import numpy as np
 import cv2
-import serial
 import pygame
-from pygame.locals import *
 import socket
-import time
-import os
 import threading
 from controlWithJoyStick import ControlWithJoyStick
+from SensorClient import UltrasonicSensorClient
+from writeToCSV import CSVWriter
+from enum import Enum
+import argparse
+import datetime
+
+class Move(Enum):
+    FORWARD = 'forward'
+    BACKWARD = 'backward'
+    LEFT = 'left'
+    RIGHT = 'right'
+    STOP = 'stop'
 
 def getAngle(x, y):
     angle = np.arctan2(x, y)
@@ -17,17 +25,21 @@ def getAngle(x, y):
 
 
 class CollectData:
-    def __init__(self):
+    def __init__(self, ipAdress, videoPort, sensorPort, csvPath, dataPath):
         self.video_server_socket = socket.socket()
-        self.video_server_socket.bind(('', 9001))
+        self.video_server_socket.bind(('', int(videoPort)))
         self.video_server_socket.listen(0)
+        self.csvPath = csvPath
+        self.dataPath = dataPath
 
         self.video_connection = self.video_server_socket.accept()[0].makefile('rb')
         self.connect_state = True
-        self.ctrl = ControlWithJoyStick()
+        self.csvClient = CSVWriter(csvPath)
+        self.ctrl = ControlWithJoyStick(ipAdress, sensorPort)
         self.wst = threading.Thread(target=self.ctrl.start)
         self.wst.daemon = True
         self.wst.start()
+        self.ultClient = UltrasonicSensorClient(ipAdress, sensorPort)
         self.joystick = pygame.joystick.Joystick(0)
         self.k = np.zeros((4, 4), 'float')
         for i in range(4):
@@ -37,14 +49,14 @@ class CollectData:
 
 
     def collect_data(self):
-        self.prev_action = ''
+        self.prev_action = Move.STOP
         saved_frame = 0
         total_frame = 0
         e1 = cv2.getTickCount()
-        image_array = np.zeros((1, 76800))
-        label_array = np.zeros((1, 4), 'float')
+        image_array = []
+        label_array = []
+        ult_array = []
 
-        # stream video frames one by one
         try:
             stream_bytes = b" "
             frame = 1
@@ -57,18 +69,20 @@ class CollectData:
                     jpg = stream_bytes[first:last + 2]
                     stream_bytes = stream_bytes[last + 2:]
                     image = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
-
-                    # select lower half of the image
-                    roi = image[120:240, :]
-
                     # save streamed images
-                    cv2.imwrite('training_images/frame{:>05}.jpg'.format(frame), roi)
+                    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                    framePostfix = '{:>05}.jpg'.format(frame)
+                    imgPath = self.dataPath + now + framePostfix
+                    cv2.imwrite(imgPath, image)
+                    image_array.append(imgPath)
 
-                    cv2.imshow('roi_image', roi)
-                    # cv2.imshow('image', image)
+                    # cv2.imshow('training mode', image)
 
-                    # reshape the roi image into one row array
-                    temp_array = roi.reshape(1, 76800).astype(np.float32)
+                    ult = { 'top_left': self.ultClient.top_left,
+                            'top_right': self.ultClient.top_right,
+                            'bot_left': self.ultClient.bot_left,
+                            'bot_right': self.ultClient.bot_right }
+                    ult_array.append(ult)
 
                     frame += 1
                     total_frame += 1
@@ -84,42 +98,36 @@ class CollectData:
                     if (abs(axisX) > 0.001 and abs(axisY) > 0.001):
                         if (abs(turnAngle) > 90):
                             print("CollectData - Turn Right with Angle:", turnAngle)
-                            image_array = np.vstack((image_array, temp_array))
-                            label_array = np.vstack((label_array, self.k[1]))
-                            self.prev_action = self.k[1]
+                            label_array.append(Move.RIGHT)
+                            self.prev_action = Move.RIGHT
                             saved_frame += 1
                         else:
                             print("CollectData - Turn Left with Angle:", -turnAngle)
-                            image_array = np.vstack((image_array, temp_array))
-                            label_array = np.vstack((label_array, self.k[0]))
-                            self.prev_action = self.k[0]
+                            label_array.append(Move.LEFT)
+                            self.prev_action = Move.LEFT
                             saved_frame += 1
                     elif linearKey > 0.001:
                         print("CollectData - Forward")
-                        image_array = np.vstack((image_array, temp_array))
-                        label_array = np.vstack((label_array, self.k[2]))
-                        self.prev_action = self.k[2]
+                        label_array.append(Move.FORWARD)
+                        self.prev_action = Move.FORWARD
                         saved_frame += 1
 
                     elif linearKey < -0.001:
                         print("CollectData - Back")
-                        image_array = np.vstack((image_array, temp_array))
-                        label_array = np.vstack((label_array, self.k[3]))
-                        self.prev_action = self.k[3]
+                        label_array.append(Move.BACKWARD)
+                        self.prev_action = Move.BACKWARD
                         saved_frame += 1
 
                     elif turnX > 0:
                         print("CollectData - Right")
-                        image_array = np.vstack((image_array, temp_array))
-                        label_array = np.vstack((label_array, self.k[1]))
-                        self.prev_action = self.k[1]
+                        label_array.append(Move.RIGHT)
+                        self.prev_action = Move.RIGHT
                         saved_frame += 1
 
                     elif turnX < 0:
                         print("CollectData - Left")
-                        image_array = np.vstack((image_array, temp_array))
-                        label_array = np.vstack((label_array, self.k[0]))
-                        self.prev_action = self.k[0]
+                        label_array.append(Move.LEFT)
+                        self.prev_action = Move.LEFT
                         saved_frame += 1
 
                     elif exitKey > 0:
@@ -127,38 +135,36 @@ class CollectData:
                         self.connect_state = False
                         break
                     elif self.prev_action != '':
-                        print("CollectData - resume")
-                        image_array = np.vstack((image_array, temp_array))
-                        label_array = np.vstack((label_array, self.prev_action))
+                        # print("CollectData - resume")
+                        label_array.append(self.prev_action)
                         saved_frame += 1
-
-
-            # save training images and labels
-            train = image_array[1:, :]
-            train_labels = label_array[1:, :]
-
-            # save training data as a numpy file
-            file_name = str(int(time.time()))
-            directory = "training_data"
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            try:
-                np.savez(directory + '/' + file_name + '.npz', train=train, train_labels=train_labels)
-            except IOError as e:
-                print(e)
 
             e2 = cv2.getTickCount()
             # calculate streaming duration
             time0 = (e2 - e1) / cv2.getTickFrequency()
             print('Streaming duration:', time0)
-
-            print(train.shape)
-            print(train_labels.shape)
             print('Total frame:', total_frame)
             print('Saved frame:', saved_frame)
             print('Dropped frame', total_frame - saved_frame)
+            for image_path, ult_data, label in zip(image_array, ult_array, label_array):
+                self.csvClient.writeToCSV({'img': imgPath, 'topLeftDistance': ult_data['top_left'],
+                                           'topRightDistance': ult_data['top_right'],
+                                           'botLeftDistance': ult_data['bot_left'],
+                                           'botRightDistance': ult_data['bot_right'],
+                                           'move': label})
 
         finally:
             self.video_server_socket.close()
 
-client = CollectData()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Start collecting training data')
+    parser.add_argument('-i', '--ipAdress', required=False, help="ip adress of rc car", default='192.168.5.66')
+    parser.add_argument('-v', '--videoPort', required=False, help="port for video streaming", default='9001')
+    parser.add_argument('-p', '--sensorPort', required=False, help="port for sensor streaming", default='8000')
+    parser.add_argument('-c', '--csvPath', required=False, help="path for csvfile", default='./train_data.csv')
+    parser.add_argument('-d', '--dataPath', required=False, help="path for traning data", default='./training_data/')
+    args = parser.parse_args()
+    print(args)
+    now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S%f")
+    print(now)
+    client = CollectData(args.ipAdress, args.videoPort, args.sensorPort, args.csvPath, args.dataPath)
