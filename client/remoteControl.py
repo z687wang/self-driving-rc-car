@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Jun 16 14:09:24 2018
-
-@author: tonyz
-"""
 
 import websocket
 import threading
