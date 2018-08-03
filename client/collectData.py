@@ -147,7 +147,7 @@ class CollectData:
             print('Saved frame:', saved_frame)
             print('Dropped frame', total_frame - saved_frame)
             for image_path, ult_data, label in zip(image_array, ult_array, label_array):
-                self.csvClient.writeToCSV({'img': imgPath, 'topLeftDistance': ult_data['top_left'],
+                 self.csvClient.writeToCSV({'img': imgPath, 'topLeftDistance': ult_data['top_left'],
                                            'topRightDistance': ult_data['top_right'],
                                            'botLeftDistance': ult_data['bot_left'],
                                            'botRightDistance': ult_data['bot_right'],
